@@ -2,6 +2,9 @@ package com.kulapps.jump;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
+import org.andengine.opengl.font.Font;
+import org.andengine.opengl.font.FontFactory;
+import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
@@ -12,6 +15,8 @@ import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.debug.Debug;
+
+import android.graphics.Color;
 
 /**
  * Singleton class Responsible to load all game related resources
@@ -39,22 +44,24 @@ public class ResourceManager {
 	public ITextureRegion menu_background_region;
 	public ITextureRegion play_region;
 	public ITextureRegion options_region;
+	
+	// LOADING SCENE
+	public Font font;
+
 	    
 	private BuildableBitmapTextureAtlas menuTextureAtlas;
 	
-	// ---------------------------------------------
-	// CLASS LOGIC
-	// ---------------------------------------------
-
+	// ------------------------------------
+	// --------  MENU Resources -----------	
+	// ------------------------------------
+	
+	/**
+	 * Load all Menu resources
+	 */
 	public void loadMenuResources() {
 		loadMenuGraphics();
+		loadMenuFonts();
 		loadMenuAudio();
-	}
-
-	public void loadGameResources() {
-		loadGameGraphics();
-		loadGameFonts();
-		loadGameAudio();
 	}
 
 	/**
@@ -78,10 +85,51 @@ public class ResourceManager {
 		}
 	}
 
+	/**
+	 * Loads menu audio
+	 */
 	private void loadMenuAudio() {
 
 	}
+	
+	/**
+	 * Loads font for "Loading" scene
+	 */
+	private void loadMenuFonts()
+	{
+	    FontFactory.setAssetBasePath("fonts/");
+	    final ITexture mainFontTexture = new BitmapTextureAtlas(mActivity.getTextureManager(), 256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
+	    font = FontFactory.createStrokeFromAsset(mActivity.getFontManager(), mainFontTexture, mActivity.getAssets(), "comicate.ttf", 50, true, Color.WHITE, 2, Color.BLACK);
+	    font.load();
+	}
+
+	/**
+	 * Unload Menu textures
+	 */
+	public void unloadMenuTextures()
+	{
+	    menuTextureAtlas.unload();
+	}
+	    
+	/**
+	 * Load menu textures
+	 */
+	public void loadMenuTextures()
+	{
+	    menuTextureAtlas.load();
+	}
+	
+	// ------------------------------------
+	// --------  GAME Resources -----------
+	// ------------------------------------
+	
+	public void loadGameResources() {
+		loadGameGraphics();
+		loadGameFonts();
+		loadGameAudio();
+	}
+	
 	private void loadGameGraphics() {
 
 	}
@@ -94,6 +142,14 @@ public class ResourceManager {
 
 	}
 
+	/**
+	 * Unloads all Game Scene Textures
+	 */
+	public void unloadGameTextures()
+	{
+	    // TODO 
+	}
+	
 	/**
 	 * Loads splash screen image
 	 */

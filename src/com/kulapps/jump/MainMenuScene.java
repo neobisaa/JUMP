@@ -66,7 +66,8 @@ public class MainMenuScene extends BaseScene implements IOnMenuItemClickListener
 	        switch(pMenuItem.getID())
 	        {
 	        case MENU_PLAY:
-	            return true;
+	        	// LoadGameScene
+	            SceneManager.getInstance().loadGameScene(engine);
 	        case MENU_OPTIONS:
 	            return true;
 	        default:

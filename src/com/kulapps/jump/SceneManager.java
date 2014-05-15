@@ -1,6 +1,8 @@
 package com.kulapps.jump;
 
 import org.andengine.engine.Engine;
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.ui.IGameInterface.OnCreateSceneCallback;
 
 /**
@@ -99,10 +101,61 @@ public class SceneManager {
     {
         ResourceManager.getInstance().loadMenuResources();
         menuScene = new MainMenuScene();
-        setScene(menuScene);
-        disposeSplashScene();
+        loadingScene = new LoadingScene();
+        SceneManager.getInstance().setScene(menuScene);
+        disposeSplashScene();        
+    }
+   
+    /**
+     * Loads loading scene, waits for Game Scene resources to load
+     * Also - unloads menu textures
+     * 
+     * @param mEngine	engine
+     */
+    public void loadGameScene(final Engine mEngine)
+    {
+        setScene(loadingScene);
+        // unload menu scene textures
+        ResourceManager.getInstance().unloadMenuTextures();
+        // register update handler - timer to check once Game resources are loaded
+        mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
+        {
+            public void onTimePassed(final TimerHandler pTimerHandler) 
+            {
+                mEngine.unregisterUpdateHandler(pTimerHandler);
+                ResourceManager.getInstance().loadGameResources();
+                // create and set game scene
+                gameScene = new GameScene();                
+                setScene(gameScene);
+            }
+        }));
     }
     
+    /**
+     * Called once going back to menu from game scene
+     * 
+     * @param mEngine		engine
+     */
+    public void loadMenuScene(final Engine mEngine)
+    {
+    	// set loading scene
+        setScene(loadingScene);
+        // dispose of game scene
+        gameScene.disposeScene();
+        ResourceManager.getInstance().unloadGameTextures();
+        // start timer to load menu resources
+        mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
+        {
+            public void onTimePassed(final TimerHandler pTimerHandler) 
+            {
+                mEngine.unregisterUpdateHandler(pTimerHandler);
+                ResourceManager.getInstance().loadMenuTextures();
+                // set menu scene
+                setScene(menuScene);
+            }
+        }));
+    }
+       
     // getters & setters
 
     /**
