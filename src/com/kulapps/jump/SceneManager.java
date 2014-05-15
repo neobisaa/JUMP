@@ -92,6 +92,17 @@ public class SceneManager {
         splashScene = null;
     }
     
+    /**
+     * Creates Menu Scene
+     */
+    public void createMenuScene()
+    {
+        ResourceManager.getInstance().loadMenuResources();
+        menuScene = new MainMenuScene();
+        setScene(menuScene);
+        disposeSplashScene();
+    }
+    
     // getters & setters
 
     /**

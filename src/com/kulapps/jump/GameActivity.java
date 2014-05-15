@@ -14,6 +14,8 @@ import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
 import org.andengine.ui.activity.BaseGameActivity;
 
+import android.view.KeyEvent;
+
 /**
  * Main Game Activity - launched at app start
  * 
@@ -54,11 +56,8 @@ public class GameActivity extends BaseGameActivity {
 		mEngine.registerUpdateHandler(new TimerHandler(2f,
 				new ITimerCallback() {
 					public void onTimePassed(final TimerHandler pTimerHandler) {
-						mEngine.unregisterUpdateHandler(pTimerHandler);
-						// load menu resources, create menu scene
-						// set menu scene using scene manager
-						// disposeSplashScene();
-						// READ NEXT ARTICLE FOR THIS PART.
+			            mEngine.unregisterUpdateHandler(pTimerHandler);
+			            SceneManager.getInstance().createMenuScene();
 					}
 				}));
 		pOnPopulateSceneCallback.onPopulateSceneFinished();
@@ -68,5 +67,22 @@ public class GameActivity extends BaseGameActivity {
 	@Override
 	public Engine onCreateEngine(EngineOptions pEngineOptions) {
 		return new LimitedFPSEngine(pEngineOptions, 60);
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) 
+	{  
+	    if (keyCode == KeyEvent.KEYCODE_BACK)
+	    {
+	        SceneManager.getInstance().getCurrentScene().onBackKeyPressed();
+	    }
+	    return false; 
+	}
+	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		System.exit(0);
 	}
 }

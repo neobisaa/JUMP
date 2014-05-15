@@ -35,7 +35,8 @@ public class SplashScene extends BaseScene
     	// scale 
     	mSplashSprite.setScale(1.5f);
     	// set position 
-    	mSplashSprite.setPosition(GAME.SCREEN_WIDTH / 2 , GAME.SCREEN_HEIGHT / 2);
+    	mSplashSprite.setPosition((GAME.SCREEN_WIDTH - resourcesManager.mSplash_region.getWidth()) /2, 
+    			(GAME.SCREEN_HEIGHT - resourcesManager.mSplash_region.getHeight()) /2);
     	attachChild(mSplashSprite);
     }
 
