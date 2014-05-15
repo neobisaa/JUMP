@@ -23,7 +23,7 @@ public class MainMenuScene extends BaseScene implements IOnMenuItemClickListener
 	 */
 	private void createBackground()
 	{
-	    attachChild(new Sprite(0, 0, resourcesManager.menu_background_region, vbom)
+	    attachChild(new Sprite(GAME.SCREEN_WIDTH/2, GAME.SCREEN_HEIGHT/2, resourcesManager.menu_background_region, vbom)
 	    {
 	        @Override
 	        protected void preDraw(GLState pGLState, Camera pCamera) 
@@ -53,7 +53,7 @@ public class MainMenuScene extends BaseScene implements IOnMenuItemClickListener
 	    menuChildScene.setBackgroundEnabled(false);
 	    
 	    playMenuItem.setPosition(playMenuItem.getX(), playMenuItem.getY() + 10);
-	    optionsMenuItem.setPosition(optionsMenuItem.getX(), optionsMenuItem.getY() + 40);
+	    optionsMenuItem.setPosition(optionsMenuItem.getX(), optionsMenuItem.getY() - 50);
 	    
 	    menuChildScene.setOnMenuItemClickListener(this);
 	    
@@ -63,16 +63,14 @@ public class MainMenuScene extends BaseScene implements IOnMenuItemClickListener
 
 	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem, float pMenuItemLocalX, float pMenuItemLocalY)
 	{
-	        switch(pMenuItem.getID())
-	        {
-	        case MENU_PLAY:
-	        	// LoadGameScene
-	            SceneManager.getInstance().loadGameScene(engine);
-	        case MENU_OPTIONS:
-	            return true;
-	        default:
-	            return false;
-	    }
+		switch (pMenuItem.getID()) {
+		case MENU_PLAY:
+			SceneManager.getInstance().loadGameScene(engine);	// Load Game Scene
+		case MENU_OPTIONS:
+			return true;
+		default:
+			return false;
+		}
 	}
 	
 	@Override

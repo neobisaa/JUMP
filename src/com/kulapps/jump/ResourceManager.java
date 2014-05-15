@@ -13,6 +13,7 @@ import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSourc
 import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtlasBuilder;
 import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder.TextureAtlasBuilderException;
 import org.andengine.opengl.texture.region.ITextureRegion;
+import org.andengine.opengl.texture.region.ITiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.debug.Debug;
 
@@ -44,12 +45,23 @@ public class ResourceManager {
 	public ITextureRegion menu_background_region;
 	public ITextureRegion play_region;
 	public ITextureRegion options_region;
+	private BuildableBitmapTextureAtlas menuTextureAtlas;
 	
 	// LOADING SCENE
 	public Font font;
-
+		
+	// GAME SCENE 
+	// Textures
+	public BuildableBitmapTextureAtlas gameTextureAtlas;
 	    
-	private BuildableBitmapTextureAtlas menuTextureAtlas;
+	// Texture Regions
+	public ITextureRegion platform1_region;
+	public ITextureRegion platform2_region;
+	public ITextureRegion platform3_region;
+	public ITextureRegion coin_region;
+	
+	// player 
+	public ITiledTextureRegion player_region;
 	
 	// ------------------------------------
 	// --------  MENU Resources -----------	
@@ -124,20 +136,49 @@ public class ResourceManager {
 	// --------  GAME Resources -----------
 	// ------------------------------------
 	
+	/**
+	 * Loads all game resources
+	 */
 	public void loadGameResources() {
 		loadGameGraphics();
 		loadGameFonts();
 		loadGameAudio();
 	}
 	
+	/**
+	 * Loads game textures
+	 */
 	private void loadGameGraphics() {
-
+		 BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
+		    gameTextureAtlas = new BuildableBitmapTextureAtlas(mActivity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
+		    
+		    platform1_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, mActivity, "platform1.png");
+		    platform2_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, mActivity, "platform2.png");
+		    platform3_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, mActivity, "platform3.png");
+		    coin_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, mActivity, "coin.png");
+		    player_region = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(gameTextureAtlas, mActivity, "player.png", 3, 1);
+		   
+		    try 
+		    {
+		        this.gameTextureAtlas.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
+		        this.gameTextureAtlas.load();
+		    } 
+		    catch (final TextureAtlasBuilderException e)
+		    {
+		        Debug.e(e);
+		    }
 	}
 
+	/**
+	 * Loads game fonts
+	 */
 	private void loadGameFonts() {
 
 	}
 
+	/**
+	 * Loads game audio
+	 */
 	private void loadGameAudio() {
 
 	}
