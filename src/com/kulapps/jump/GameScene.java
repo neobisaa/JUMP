@@ -3,6 +3,8 @@ package com.kulapps.jump;
 import java.io.IOException;
 
 import org.andengine.engine.camera.hud.HUD;
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.LoopEntityModifier;
 import org.andengine.entity.modifier.ScaleModifier;
@@ -27,7 +29,13 @@ import org.xml.sax.Attributes;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
+import com.kulapps.jump.LevelCompleteWindow.StarsCount;
 import com.kulapps.jump.SceneManager.SceneType;
 
 public class GameScene extends BaseScene implements IOnSceneTouchListener 
@@ -51,11 +59,34 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLATFORM2 = "platform2";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLATFORM3 = "platform3";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_COIN = "coin";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEVEL_COMPLETE = "levelComplete";
+
 	
 	// player related
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER = "player";    
 	private Player player;
 	private boolean firstTouch = false;
+	
+	// game over
+	private Text gameOverText;
+	private boolean gameOverDisplayed = false;
+	
+	// level complete
+	private LevelCompleteWindow levelCompleteWindow;
+
+	
+	private void createGameOverText()
+	{
+	    gameOverText = new Text(0, 0, resourcesManager.font, "Game Over!", vbom);
+	}
+
+	private void displayGameOverText()
+	{
+	    camera.setChaseEntity(null);
+	    gameOverText.setPosition(camera.getCenterX(), camera.getCenterY());
+	    attachChild(gameOverText);
+	    gameOverDisplayed = true;
+	}
 	
 	/**
 	 * Handles score increment
@@ -78,14 +109,16 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 	    scoreText = new Text(20, 420, resourcesManager.font, "Score: 0123456789", vbom);
 	    scoreText.setAnchorCenter(0, 0);     
 	    scoreText.setText("Score: 0");
-	    gameHUD.attachChild(scoreText);
-	    
+	    gameHUD.attachChild(scoreText);	    
 	    camera.setHUD(gameHUD);
+	    createGameOverText();
+	    setOnSceneTouchListener(this); 
 	}
 	
 	private void createPhysics()
 	{
-	    physicsWorld = new FixedStepPhysicsWorld(GAME.FPS, new Vector2(GAME.GRAVITY_X, GAME.GRAVITY_Y), false); 
+	    physicsWorld = new FixedStepPhysicsWorld(GAME.FPS, new Vector2(GAME.GRAVITY_X, GAME.GRAVITY_Y), false);
+	    physicsWorld.setContactListener(contactListener());
 	    registerUpdateHandler(physicsWorld);
 	}
 	
@@ -96,6 +129,8 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		createHUD();
 		createPhysics();
 		loadLevel(1);
+		levelCompleteWindow = new LevelCompleteWindow(vbom);
+
 	}
 
     @Override
@@ -135,8 +170,8 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
                 final int width = SAXUtils.getIntAttributeOrThrow(pAttributes, LevelConstants.TAG_LEVEL_ATTRIBUTE_WIDTH);
                 final int height = SAXUtils.getIntAttributeOrThrow(pAttributes, LevelConstants.TAG_LEVEL_ATTRIBUTE_HEIGHT);
                 
-                // TODO later we will specify camera BOUNDS and create invisible walls
-                // on the beginning and on the end of the level.
+                camera.setBounds(0, 0, width, height); // here we set camera bounds
+                camera.setBoundsEnabled(true);
 
                 return GameScene.this;
             }
@@ -178,14 +213,14 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
                         @Override
                         protected void onManagedUpdate(float pSecondsElapsed) 
                         {
-                            super.onManagedUpdate(pSecondsElapsed);
-                            
-                            /** 
-                             * TODO
-                             * we will later check if player collide with this (coin)
-                             * and if it does, we will increase score and hide coin
-                             * it will be completed in next articles (after creating player code)
-                             */
+                        	super.onManagedUpdate(pSecondsElapsed);
+
+                            if (player.collidesWith(this))
+                            {
+                                addToScore(10);
+                                this.setVisible(false);
+                                this.setIgnoreUpdate(true);
+                            }
                         }
                     };
                     levelObject.registerEntityModifier(new LoopEntityModifier(new ScaleModifier(1, 1, 1.3f)));
@@ -197,10 +232,31 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
                         @Override
                         public void onDie()
                         {
-                            // TODO Latter we will handle it.
-                        }
+                        	 if (!gameOverDisplayed)
+                        	    {
+                        	        displayGameOverText();
+                        	    }                        }
                     };
                     levelObject = player;
+                }
+                else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEVEL_COMPLETE))
+                {
+                    levelObject = new Sprite(x, y, resourcesManager.complete_stars_region, vbom)
+                    {
+                        @Override
+                        protected void onManagedUpdate(float pSecondsElapsed) 
+                        {
+                            super.onManagedUpdate(pSecondsElapsed);
+
+                            if (player.collidesWith(this))
+                            {
+                                levelCompleteWindow.display(StarsCount.TWO, GameScene.this, camera);
+                                this.setVisible(false);
+                                this.setIgnoreUpdate(true);
+                            }
+                        }
+                    };
+                    levelObject.registerEntityModifier(new LoopEntityModifier(new ScaleModifier(1, 1, 1.3f)));
                 }
                 else
                 {
@@ -232,4 +288,74 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 	    }
 	    return false;    
 	}
+	
+	
+	/**
+	 * Handles object collisions
+	 * @return
+	 */
+	private ContactListener contactListener()
+	{
+	    ContactListener contactListener = new ContactListener()
+	    {
+	        public void beginContact(Contact contact)
+	        {
+	            final Fixture x1 = contact.getFixtureA();
+	            final Fixture x2 = contact.getFixtureB();
+
+	            if (x1.getBody().getUserData() != null && x2.getBody().getUserData() != null)
+	            {
+	                if (x2.getBody().getUserData().equals("player"))
+	                {
+	                    player.increaseFootContacts();
+	                }
+	                // platform 2 to fall directly
+	                if (x1.getBody().getUserData().equals("platform3") && x2.getBody().getUserData().equals("player"))
+	                {
+	                    x1.getBody().setType(BodyType.DynamicBody);
+	                }
+	                
+	                // platforms 3 fall with delay
+	                if (x1.getBody().getUserData().equals("platform2") && x2.getBody().getUserData().equals("player"))
+	                {
+	                    engine.registerUpdateHandler(new TimerHandler(0.2f, new ITimerCallback()
+	                    {                                    
+	                        public void onTimePassed(final TimerHandler pTimerHandler)
+	                        {
+	                            pTimerHandler.reset();
+	                            engine.unregisterUpdateHandler(pTimerHandler);
+	                            x1.getBody().setType(BodyType.DynamicBody);
+	                        }
+	                    }));
+	                }
+	            }
+	        }
+
+	        public void endContact(Contact contact)
+	        {
+	            final Fixture x1 = contact.getFixtureA();
+	            final Fixture x2 = contact.getFixtureB();
+
+	            if (x1.getBody().getUserData() != null && x2.getBody().getUserData() != null)
+	            {
+	                if (x2.getBody().getUserData().equals("player"))
+	                {
+	                    player.decreaseFootContacts();
+	                }
+	            }
+	        }
+
+	        public void preSolve(Contact contact, Manifold oldManifold)
+	        {
+
+	        }
+
+	        public void postSolve(Contact contact, ContactImpulse impulse)
+	        {
+
+	        }
+	    };
+	    return contactListener;
+	}
+	
 }

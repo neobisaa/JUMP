@@ -16,9 +16,20 @@ public abstract class Player extends AnimatedSprite
 	// members 
 	private Body body;
 	private boolean canRun = false;
+	private int footContacts = 0;
 
-
+	
 	public abstract void onDie();
+	
+	public void increaseFootContacts()
+	{
+	    footContacts++;
+	}
+
+	public void decreaseFootContacts()
+	{
+	    footContacts--;
+	}
 	
 	private void createPhysics(final Camera camera, PhysicsWorld physicsWorld)
 	{        
@@ -42,7 +53,7 @@ public abstract class Player extends AnimatedSprite
 	            
 	            if (canRun)
 	            {    
-	                body.setLinearVelocity(new Vector2(5, body.getLinearVelocity().y)); 
+	                body.setLinearVelocity(new Vector2(3, body.getLinearVelocity().y)); 
 	            }
 	        }
 	    });
@@ -60,6 +71,10 @@ public abstract class Player extends AnimatedSprite
 	
 	public void jump()
 	{
+		if (footContacts < 1) 
+	    {
+	        return; 
+	    }
 	    body.setLinearVelocity(new Vector2(body.getLinearVelocity().x, 12)); 
 	}
 	
@@ -75,6 +90,6 @@ public abstract class Player extends AnimatedSprite
     {
         super(pX, pY, ResourceManager.getInstance().player_region, vbo);
         createPhysics(camera, physicsWorld);
-        //camera.setChaseEntity(this);
+        camera.setChaseEntity(this);
     }
 }

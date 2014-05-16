@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.LimitedFPSEngine;
+import org.andengine.engine.camera.BoundCamera;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
@@ -25,14 +26,14 @@ import android.view.KeyEvent;
 public class GameActivity extends BaseGameActivity {
 	
 	// members
-	private Camera mCamera;
+	private BoundCamera mCamera;
 
 	// ResourceManager
 	private ResourceManager mResMgr;
 
 	
 	public EngineOptions onCreateEngineOptions() {
-		mCamera = new Camera(0, 0, GAME.SCREEN_WIDTH, GAME.SCREEN_HEIGHT);
+		mCamera = new BoundCamera(0, 0, GAME.SCREEN_WIDTH, GAME.SCREEN_HEIGHT);
 		EngineOptions engineOptions = new EngineOptions(true,
 				ScreenOrientation.LANDSCAPE_FIXED, new RatioResolutionPolicy(
 						800, 480), this.mCamera);

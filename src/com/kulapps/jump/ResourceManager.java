@@ -1,6 +1,7 @@
 package com.kulapps.jump;
 
 import org.andengine.engine.Engine;
+import org.andengine.engine.camera.BoundCamera;
 import org.andengine.engine.camera.Camera;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontFactory;
@@ -30,7 +31,7 @@ public class ResourceManager {
 
 	public Engine mEngine;
 	public GameActivity mActivity;
-	public Camera mCamera;
+	public BoundCamera mCamera;
 	public VertexBufferObjectManager mVBOM;
 
 	// ---------------------------------------------
@@ -60,8 +61,12 @@ public class ResourceManager {
 	public ITextureRegion platform3_region;
 	public ITextureRegion coin_region;
 	
-	// player 
+	// Player 
 	public ITiledTextureRegion player_region;
+	
+	// Level Complete
+	public ITextureRegion complete_window_region;
+	public ITiledTextureRegion complete_stars_region;
 	
 	// ------------------------------------
 	// --------  MENU Resources -----------	
@@ -156,6 +161,8 @@ public class ResourceManager {
 		    platform2_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, mActivity, "platform2.png");
 		    platform3_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, mActivity, "platform3.png");
 		    coin_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, mActivity, "coin.png");
+		    complete_window_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, mActivity, "complete.png");
+		    complete_stars_region = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(gameTextureAtlas, mActivity, "star.png", 2, 1);
 		    player_region = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(gameTextureAtlas, mActivity, "player.png", 3, 1);
 		   
 		    try 
@@ -219,7 +226,7 @@ public class ResourceManager {
 	 *            we can latter access them from different classes (eg. scenes)
 	 */
 	public static void prepareManager(Engine engine, GameActivity activity,
-			Camera camera, VertexBufferObjectManager vbom) {
+			BoundCamera camera, VertexBufferObjectManager vbom) {
 		getInstance().mEngine = engine;
 		getInstance().mActivity = activity;
 		getInstance().mCamera = camera;
